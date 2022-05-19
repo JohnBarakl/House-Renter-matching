@@ -73,7 +73,7 @@ print_house(House) :-
 
 % Συνθήκη κενής λίστας: Δεν υπάρχουν διαθέσιμα σπίτια!
 print_houses([]) :-
-    write("Δεν υπάρχει κατάλληλο σπίτι!"), nl.
+    write("Δεν υπάρχει κατάλληλο σπίτι!").
 
 % Τερματική συνθήκη: Λίστα με ένα στοιχείο: Απλά κάνω μία εκτύπωση.
 print_houses([House]) :-
@@ -145,7 +145,7 @@ function(1) :-
 
     % Εκτύπωση αποτελεσμάτων.
     print_houses(Compatible_Houses), nl,
-    print_best_addresses(Best_House_Addr).
+    print_best_addresses(Best_House_Addr), nl, nl.
 
 
 % Εκτέλεση λειτουργίας batch mode.
@@ -172,8 +172,6 @@ begin(0).
 begin(Execution_mode) :-
     % Εκτέλεση λειτουργίας.
     function(Execution_mode),
-
-    nl,
 
     % Τυπώνεται το μενού όπου εμφανίζονται οι διαθέσιμες επιλογές.
     print_menu,
