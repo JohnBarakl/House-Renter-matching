@@ -1,4 +1,4 @@
-encoding(utf8). % Ορίζεται ότι αυτό το αρχείο είναι κωδικοποιημένο σε  UTF-8 και έτσι πρέπει να το αναγνωρίζει η Prolog.
+% This file is encoded in UTF-8.
 
 % house(Διεύθυνση, Αριθμός_Υπνοδωματίων, Εμβαδόν, Κέντρο_Πόλης, Όροφος, Ανελκυστήρας, Κατοικίδια, Εμβαδόν_Κήπου, Ενοίκιο).
 % house(Address, Sleeping_Quarters, Floor_Area, At_Center, Floor, Has_Elevator, Allows_Pets, Garden_Area, Rent).

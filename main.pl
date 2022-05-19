@@ -1,14 +1,5 @@
+% This file is encoded in UTF-8.
 encoding(utf8). % Ορίζεται ότι αυτό το αρχείο είναι κωδικοποιημένο σε  UTF-8 και έτσι πρέπει να το αναγνωρίζει η Prolog.
-
-/* ------------------------------------ *|
-|* -- Φόρτωση εξωτερικών πληροφοριών -- *|
-|* ------------------------------------ */ 
-
-% "Φόρτωση" της λογικής.
-consult("logic.pl").
-
-% "Διάβασμα" δεδομένων.
-consult("houses.pl"). consult("requests.pl").
 
 /* ------------------------------------------------ *|
 |* -- Επικυρωμένη επιλογή λειτουργίας απο χρήστη -- *|
@@ -26,13 +17,13 @@ ensure_right_menu_selection(_, Y) :-
 
     print_menu,
     % Διαβάζω νέα επιλογή.
-    read(X),
+    read(X), nl,
     ensure_right_menu_selection(X, Y).
 
 % Διαβάζει την επιλογή (μενού) του χρήστη και την "επιστρέφει", αν είναι σωστή.
 % Διαφορετικά, την ζητάει επαναληπτικά μέχρι να είναι ορθή.
 safe_read_menu_selection(X) :-
-    read(Temp),
+    read(Temp), nl, 
     ensure_right_menu_selection(Temp, X).
 
 
@@ -69,7 +60,7 @@ print_house(House) :-
     write("Υπνοδωμάτια: "), write(Sleeping_Quarters), nl,
     write("Εμβαδόν: "), write(Floor_Area), nl,
     write("Εμβαδόν κήπου: "), write(Garden_Area), nl,
-    write("Είναι στο κέντρο της πόλης: "), write(At_Center, Floor), nl,
+    write("Είναι στο κέντρο της πόλης: "), write(At_Center), nl,
     write("Επιτρέπονται κατοικίδια: "), write(Allows_Pets), nl,
     write("Όροφος: "), write(Floor), nl,
     write("Ανελκυστήρας: "), write(Has_Elevator), nl,
@@ -80,16 +71,20 @@ print_house(House) :-
 %% print_houses(House_List).
 %% Εκτυπώνει στην έξοδο όλες τις πληροφορίες για μία λίστα σπιτιών.
 
-% Τερματική συνθήκη: Κενή λίστα.
-print_houses([]).
+% Συνθήκη κενής λίστας: Δεν υπάρχουν διαθέσιμα σπίτια!
+print_houses([]) :-
+    write("Δεν υπάρχει κατάλληλο σπίτι!"), nl.
+
+% Τερματική συνθήκη: Λίστα με ένα στοιχείο: Απλά κάνω μία εκτύπωση.
+print_houses([House]) :-
+    print_house(House).
 
 % Αναδρομική επανάληψη εκτυπώσεων.
 print_houses([House | Rest]) :-
     print_house(House),
     nl,
     print_houses(Rest).
-
-
+        
 %% print_best_addresses\1
 %% print_best_addresses(Address_List).
 %% Εκτυπώνει στην έξοδο όλες τις διευθύνσεις των σπιτιών για τα οποία προτείνεται η ενοικίαση (μαζί με αντίστοιχο μήνυμα: "Προτείνεται η ενοικίαση του διαμερίσματος στην διεύθυνση: ...").
@@ -103,6 +98,28 @@ print_best_addresses([Address | Rest]) :-
     nl,
     print_best_addresses(Rest).
 
+
+%% print_all_renter_matces/
+%% print_all_renter_matces()
+%% Δέχεται σαν είσοδο μία λίστα με πελάτες και για τον κάθε ένα θα τυπώνει το όνομα του και τα συμβατά σπίτια καθώς και το προτεινόμενο προς ενοικίαση.
+
+% Τερματική συνθήκη: Κενή λίστα, απλά αληθεύει.
+print_all_renter_matces([]).
+
+print_all_renter_matces([Renter_Name | Rest]) :-
+    % Βρίσκω τα καλύτερα σπίτια και την διεύθυνση του καλύτερου.
+    mode_2(Renter_Name, Compatible_Houses, Best_House_Addr),
+
+    write("Κατάλληλα διαμερίσματα για τον πελάτη: "), write(Renter_Name), nl,
+    write("=============================="), nl,
+
+    % Εκτύπωση αποτελεσμάτων.
+    print_houses(Compatible_Houses), nl,
+    print_best_addresses(Best_House_Addr), nl, nl,
+
+    print_all_renter_matces(Rest).
+    
+
 /* -------------------------- *|
 |* -- Εκτέλεση λειτουργιών -- *|
 |* -------------------------- */ 
@@ -112,30 +129,31 @@ function(1) :-
     % Διαδραστική άντληση πληροφοριών από τον χρήστη.
     write("Δώσε τις παρακάτω πληροφορίες:"), nl,
     write("=============================="), nl,
-    write("Ελάχιστο Εμβαδόν: "), read(Min_Area), nl,
-    write("Ελάχιστος αριθμός υπονοδωματίων: "), read(Min_Sleeping_Quarters), nl,
-    write("Να επιτρέπονται κατοικίδια; (yes/no) "), read(Requires_Pets), nl,
-    write("Από ποιον όροφο και πάνω να υπάρχει ανελκυστήρας; "), read(Elevator_Limit), nl,
-    write("Ποιο είναι το μέγιστο ενοίκιο που μπορείς να πληρώσεις; "), read(Max_Rent), nl,
+    write("Ελάχιστο Εμβαδόν: "), read(Min_Area), 
+    write("Ελάχιστος αριθμός υπονοδωματίων: "), read(Min_Sleeping_Quarters), 
+    write("Να επιτρέπονται κατοικίδια; (yes/no) "), read(Requires_Pets),
+    write("Από ποιον όροφο και πάνω να υπάρχει ανελκυστήρας; "), read(Elevator_Limit),
+    write("Ποιο είναι το μέγιστο ενοίκιο που μπορείς να πληρώσεις; "), read(Max_Rent),
+    write("Πόσα θα έδινες για ένα διαμέρισμα στο κέντρο της πόλης (στα ελάχιστα τετραγωνικά); "), read(Max_Rent_Center), 
+    write("Πόσα θα έδινες για ένα διαμέρισμα στα προάστια της πόλης (στα ελάχιστα τετραγωνικά);"), read(Max_Rent_Suburbs), 
+    write("Πόσα θα έδινες για κάθε τετραγωνικό διαμερίσματος πάνω από το ελάχιστο; "), read(Bonus_Area),
+    write("Πόσα θα έδινες για κάθε τετραγωνικό κήπου; "), read(Bonus_Garden),
     nl,
-    write("Πόσα θα έδινες για ένα διαμέρισμα στο κέντρο της πόλης (στα ελάχιστα τετραγωνικά); "), read(Max_Rent_Center), nl,
-    nl,
-    write("Πόσα θα έδινες για ένα διαμέρισμα στα προάστια της πόλης (στα ελάχιστα τετραγωνικά);"), read(Max_Rent_Suburbs), nl,
-    nl,
-    write("Πόσα θα έδινες για κάθε τετραγωνικό διαμερίσματος πάνω από το ελάχιστο; "), read(Bonus_Area), nl,
-    write("Πόσα θα έδινες για κάθε τετραγωνικό κήπου; "), read(Bonus_Garden), nl,
 
     % Εύρεση σχετικών διαμερισμάτων.
     mode_1(Min_Area, Min_Sleeping_Quarters, Requires_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden, Compatible_Houses, Best_House_Addr),
 
     % Εκτύπωση αποτελεσμάτων.
-    print_houses(Compatible_Houses),
+    print_houses(Compatible_Houses), nl,
     print_best_addresses(Best_House_Addr).
 
 
 % Εκτέλεση λειτουργίας batch mode.
 function(2) :- 
-    write("Test function 2!"), nl.
+    % Βρίσκω τα ονόματα όλων των πελατών.
+    findall(Name, request(Name, _, _, _, _, _, _, _, _, _), Name_List),
+    print_all_renter_matces(Name_List).
+
 
 % Εκτέλεση λειτουργίας δημοπρασίας.
 function(3) :- 
@@ -155,6 +173,8 @@ begin(Execution_mode) :-
     % Εκτέλεση λειτουργίας.
     function(Execution_mode),
 
+    nl,
+
     % Τυπώνεται το μενού όπου εμφανίζονται οι διαθέσιμες επιλογές.
     print_menu,
 
@@ -164,6 +184,16 @@ begin(Execution_mode) :-
     % Επανάληψη.
     begin(New_Execution_mode).
 
+/* ------------------------------------ *|
+|* -- Φόρτωση εξωτερικών πληροφοριών -- *|
+|* ------------------------------------ */ 
+
+load_external_data :-
+    % "Φόρτωση" της λογικής.
+    consult("logic.pl"),
+
+    % "Διάβασμα" δεδομένων.
+    consult("houses.pl"), consult("requests.pl").
 
 /* ----------------------  *|
 |* -- Κύριο Κατηγόρημα --  *|
@@ -171,6 +201,9 @@ begin(Execution_mode) :-
 
 % Το κύριο κατηγόρημα του προγράμματος που θα αντιστοιχούσε σε μία συνάρτηση main.
 run :- 
+    % Φόρτωση εξωτερικών πληροφοριών.
+    load_external_data,
+
     % Τυπώνεται το μενού όπου εμφανίζονται οι διαθέσιμες επιλογές.
     print_menu,
 

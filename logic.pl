@@ -1,4 +1,4 @@
-encoding(utf8). % Ορίζεται ότι αυτό το αρχείο είναι κωδικοποιημένο σε  UTF-8 και έτσι πρέπει να το αναγνωρίζει η Prolog.
+% This file is encoded in UTF-8.
 
 % Φόρτωση εξωτερικών πληροφοριών δεν γίνεται, θεωρείται ότι έγιναν από main.pl.
 
@@ -108,7 +108,7 @@ find_cheaper_aux([X | Tail], Min_Rent, Temp_Cheapest_House_List, Min_Houses) :-
 %% cheapest_house(X, Y, Cheapest).
 %% Δέχεται σαν είσοδο δύο σπίτια (X, Y) και "επιστρέφει" εκείνο με το μικρότερο ενοίκιο (Cheapest).
 
-% Περίπτωση X < Y.
+% Περίπτωση X =< Y.
 cheapest_house(X, Y, X) :-
     % "Ξεπακετάρισμα" του κατηγορήματος του σπιτιού (κρατώντας μόνο το ενοίκιο).
     X = house(_, _, _, _, _, _, _, _, X_Rent),
@@ -127,7 +127,7 @@ cheapest_house(X, Y, Y) :-
     % "Ξεπακετάρισμα" του κατηγορήματος του σπιτιού (κρατώντας μόνο το ενοίκιο).
     Y = house(_, _, _, _, _, _, _, _, Y_Rent),
 
-    X_Rent < Y_Rent.
+    X_Rent > Y_Rent.
 
 
 %% find_cheapest_rent/2
@@ -222,7 +222,7 @@ find_biggest_garden_aux([X | Tail], Max_Garden_Area, Temp_Biggest_Garden_House_L
 %% biggest_garden_house(X, Y, Z).
 %% Δέχεται σαν είσοδο δύο σπίτια (X, Y) και "επιστρέφει" εκείνο με τον μεγαλύτερο κήπο (Z).
 
-% Περίπτωση X < Y.
+% Περίπτωση X =< Y.
 biggest_garden_house(X, Y, X) :-
     % "Ξεπακετάρισμα" του κατηγορήματος του σπιτιού (κρατώντας μόνο τα τετραγωνικά του κήπου).
     X = house(_, _, _, _, _, _, _, X_Garden_Area, _),
@@ -458,3 +458,22 @@ mode_1(Min_Area, Min_Sleeping_Quarters, Requires_Pets, Elevator_Limit, Max_Rent,
 
     % Βρίσκω τα προτεινόμενα (καλύτερα) σπίτια.
     find_best_house(Compatible_Houses, Best_House_Addr).
+
+/* --------------------------------- *|
+|* --        Λειτουργία 2         -- *|
+|* -- Μαζικές προτιμήσεις πελατών -- *|
+|* --------------------------------- */ 
+
+%% mode_2/3
+%% mode_2(Renter_Name, Compatible_Houses, Best_House_Addr).
+%% Δέχεται σαν είσοδο το όνομα ενός υποψήφιου ενοικιαστή και επιστρέφει μία λίστα με και επιστρέφει λίστα (Compatible_Houses) με ένα ή περισσότερα διαμερίσματα που ικανοποιούν τις απαιτήσεις του υποψήφιου ενοικιαστή
+%% (με ολόκληρους τους συναρτησιακούς όρους house/9).
+mode_2(Renter_Name, Compatible_Houses, Best_House_Addr) :-
+    % Εντοπίζω τις απαιτήσεις του κατονομαζόμενου πιθανού ενοικιαστή.
+    request(Renter_Name, Min_Area, Min_Sleeping_Quarters, Requires_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden),
+
+    % Βρίσκω τα συμβατά σπίτια και το καλύτερο.
+    mode_1(Min_Area, Min_Sleeping_Quarters, Requires_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden, Compatible_Houses, Best_House_Addr).
+
+
+
