@@ -99,8 +99,8 @@ print_best_addresses([Address | Rest]) :-
     print_best_addresses(Rest).
 
 
-%% print_all_renter_matces/
-%% print_all_renter_matces()
+%% print_all_renter_matces/1
+%% print_all_renter_matces(Renter_Name_List)
 %% Δέχεται σαν είσοδο μία λίστα με πελάτες και για τον κάθε ένα θα τυπώνει το όνομα του και τα συμβατά σπίτια καθώς και το προτεινόμενο προς ενοικίαση.
 
 % Τερματική συνθήκη: Κενή λίστα, απλά αληθεύει.
@@ -213,7 +213,7 @@ run :-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TODO: REMOVE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-debug_3(Name, House_Maxrent_List,Sorted_House_Max_Rent_List) :-
+debug_3(Request_HouseList) :-
     load_external_data,
 
     /*
@@ -222,9 +222,19 @@ debug_3(Name, House_Maxrent_List,Sorted_House_Max_Rent_List) :-
     request("John Smith",,,,,,,,5,2).
 
     */
+
+    findall(Name, request(Name, _, _, _, _, _, _, _, _, _), Name_List),
+    findall(X, db_3_sub(X, Name_List), Request_HouseList).
+
+
+
+db_3_sub(request_house(Name, Sorted_House_Max_Rent_List), [Name | _Rest_Names]) :-
     request(Name, Min_Area, Min_Sleeping_Quarters, Req_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden),
     compatible_houses_w_maxrent(Min_Area, Min_Sleeping_Quarters, Req_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden, _House_List, House_Maxrent_List),
     sort_houses_best_top(House_Maxrent_List, Sorted_House_Max_Rent_List).
+    
+db_3_sub(RH, [_Name | Rest_Names]) :-
+    db_3_sub(RH, Rest_Names).
  
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TODO: REMOVE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
