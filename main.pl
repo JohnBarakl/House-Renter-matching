@@ -210,3 +210,22 @@ run :-
 
     % Εκκίνηση κυρίως προγράμματος.
     begin(Execution_mode).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TODO: REMOVE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+debug_3(Name, House_Maxrent_List,Sorted_House_Max_Rent_List) :-
+    load_external_data,
+
+    /*
+    % request(Name, Min_Area, Min_Sleeping_Quarters, Req_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden).
+
+    request("John Smith",,,,,,,,5,2).
+
+    */
+    request(Name, Min_Area, Min_Sleeping_Quarters, Req_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden),
+    compatible_houses_w_maxrent(Min_Area, Min_Sleeping_Quarters, Req_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden, _House_List, House_Maxrent_List),
+    sort_houses_best_top(House_Maxrent_List, Sorted_House_Max_Rent_List).
+ 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TODO: REMOVE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+

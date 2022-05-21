@@ -34,11 +34,11 @@ satisfies_rent_requirements(no, _, Floor_Area, Min_Area, Max_Rent_Suburbs, Bonus
     New_Limited_Max_Rent >= Rent.
 
 %% compatible_house/9
-%% compatible_house(Min_Area, Min_Sleeping_Quarters, Requires_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden, House, Max_Rent).
+%% compatible_house(Min_Area, Min_Sleeping_Quarters, Requires_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden, House, Max_Rent_Willing).
 %% Επιτυγχάνει για διαμέρισμα με διεύθυνση House_Address, το οποίο ικανοποιεί τους δοθέντες περιορισμούς.
 %% Το "Max_Rent" περιέχει το μέγιστο ποσό (ενοίκιο) που είναι διατίθεται ο ενοικιαστής να δώσει για αυτό το σπίτι.
 
-compatible_house(Min_Area, Min_Sleeping_Quarters, Requires_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden, House, Max_Rent) :-
+compatible_house(Min_Area, Min_Sleeping_Quarters, Requires_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden, House, Max_Rent_Willing) :-
     % "Δίνω" τιμές στις μεταβλητές που αργότερα θα ελέγξω.
     house(House_Address, Sleeping_Quarters, Floor_Area, At_Center, Floor, Has_Elevator, Allows_Pets, Garden_Area, Rent),
 
@@ -49,24 +49,24 @@ compatible_house(Min_Area, Min_Sleeping_Quarters, Requires_Pets, Elevator_Limit,
     Allows_Pets == Requires_Pets,
 
     % Απαιτήσεις σχετικά με το ενοίκιο.
-    satisfies_rent_requirements(At_Center, Max_Rent_Center,Floor_Area, Min_Area, Max_Rent_Suburbs, Bonus_Area, Garden_Area, Bonus_Garden, Max_Rent, Rent, Max_Rent),
+    satisfies_rent_requirements(At_Center, Max_Rent_Center,Floor_Area, Min_Area, Max_Rent_Suburbs, Bonus_Area, Garden_Area, Bonus_Garden, Max_Rent, Rent, Max_Rent_Willing),
     House = house(House_Address, Sleeping_Quarters, Floor_Area, At_Center, Floor, Has_Elevator, Allows_Pets, Garden_Area, Rent).
 
 %% compatible_houses/8
 %% compatible_houses(Min_Area, Min_Sleeping_Quarters, Requires_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden, House_List).
 %% Βρίσκει και επιστρέφει μία λίστα με τα σπίτια που ικανοποιούν τις απαιτήσεις του ενοικιαστή.
 compatible_houses(Min_Area, Min_Sleeping_Quarters, Requires_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden, House_List) :-
-    findall(House, compatible_house(Min_Area, Min_Sleeping_Quarters, Requires_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden, House, _Max_Rent), House_List).
+    findall(House, compatible_house(Min_Area, Min_Sleeping_Quarters, Requires_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden, House, _Max_Rent_Willing), House_List).
 
 
 %% compatible_houses_w_maxrent/9
 %% compatible_houses(Min_Area, Min_Sleeping_Quarters, Requires_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden, House_List, Maxrent_List).
 %% Βρίσκει και επιστρέφει μία λίστα με σπίτια που ικανοποιούν τις απαιτήσεις του ενοικιαστή (House_List). 
-%% Παράλληλα, επιστρέφει και λίστα (Maxrent_List) με ζεύγη σπιτιών και μεγίστου διατιθέμενου ενοικίου για αυτά, τα οποία ικανοποιούν τις απαιτήσεις του ενοικιαστή. Τα ζεύγη που περιέχει η λίστα έχουν την μορφή
+%% Παράλληλα, επιστρέφει και λίστα (House_Maxrent_List) με ζεύγη σπιτιών και μεγίστου διατιθέμενου ενοικίου για αυτά, τα οποία ικανοποιούν τις απαιτήσεις του ενοικιαστή. Τα ζεύγη που περιέχει η λίστα έχουν την μορφή
 %% house_maxrent(House, Max_Rent).
-compatible_houses_w_maxrent(Min_Area, Min_Sleeping_Quarters, Requires_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden, House_List, Maxrent_List) :-
+compatible_houses_w_maxrent(Min_Area, Min_Sleeping_Quarters, Requires_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden, House_List, House_Maxrent_List) :-
     % Βρίσκω όλα τα σπίτια και τα μέγιστα διατιθέμενα ενοίκια.
-    findall(house_maxrent(House, Max_Rent), compatible_house(Min_Area, Min_Sleeping_Quarters, Requires_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden, House, Rent, Max_Rent), House_Maxrent_List),
+    findall(house_maxrent(House, Max_Rent_Willing), compatible_house(Min_Area, Min_Sleeping_Quarters, Requires_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden, House, Max_Rent_Willing), House_Maxrent_List),
 
     % Βρίσκω όλα τα συμβατά σπίτια από τα ζεύγη.
     findall(House, select(house_maxrent(House, _Max_Rent), House_Maxrent_List, _Rest), House_List).
@@ -452,24 +452,24 @@ find_best_house(Houses, Recommended_House_Addresses) :-
 % Περίπτωση 1.1: Το πρώτο είναι πιο φθηνό από το δεύτερο.
 pick_best_house(House_1, House_2, House_1) :-
         % Ανάλυση του πολύπλοκου συναρτησιακού όρου house_maxrent(house(House_Address, Sleeping_Quarters, Floor_Area, At_Center, Floor, Has_Elevator, Allows_Pets, Garden_Area, Rent), Max_Rent).
-        H1_Head = house_maxrent(house(_H1_House_Address, _H1_Sleeping_Quarters, H1_Floor_Area, _H1_At_Center, _H1_Floor, _H1_Has_Elevator, _H1_Allows_Pets, H1_Garden_Area, H1_Rent), _H1_Max_Rent),
-        H2_Head = house_maxrent(house(_H2_House_Address, _H2_Sleeping_Quarters, H2_Floor_Area, _H2_At_Center, _H2_Floor, _H2_Has_Elevator, _H2_Allows_Pets, H2_Garden_Area, H2_Rent), _H2_Max_Rent),
+        House_1 = house_maxrent(house(_H1_House_Address, _H1_Sleeping_Quarters, _H1_Floor_Area, _H1_At_Center, _H1_Floor, _H1_Has_Elevator, _H1_Allows_Pets, _H1_Garden_Area, H1_Rent), _H1_Max_Rent),
+        House_2 = house_maxrent(house(_H2_House_Address, _H2_Sleeping_Quarters, _H2_Floor_Area, _H2_At_Center, _H2_Floor, _H2_Has_Elevator, _H2_Allows_Pets, _H2_Garden_Area, H2_Rent), _H2_Max_Rent),
 
         H1_Rent < H2_Rent, !.
 
 % Περίπτωση 1.2: Το πρώτο είναι πιο ακριβό από το δεύτερο.
 pick_best_house(House_1, House_2, House_2) :-
         % Ανάλυση του πολύπλοκου συναρτησιακού όρου house_maxrent(house(House_Address, Sleeping_Quarters, Floor_Area, At_Center, Floor, Has_Elevator, Allows_Pets, Garden_Area, Rent), Max_Rent).
-        H1_Head = house_maxrent(house(_H1_House_Address, _H1_Sleeping_Quarters, H1_Floor_Area, _H1_At_Center, _H1_Floor, _H1_Has_Elevator, _H1_Allows_Pets, H1_Garden_Area, H1_Rent), _H1_Max_Rent),
-        H2_Head = house_maxrent(house(_H2_House_Address, _H2_Sleeping_Quarters, H2_Floor_Area, _H2_At_Center, _H2_Floor, _H2_Has_Elevator, _H2_Allows_Pets, H2_Garden_Area, H2_Rent), _H2_Max_Rent),
+        House_1 = house_maxrent(house(_H1_House_Address, _H1_Sleeping_Quarters, _H1_Floor_Area, _H1_At_Center, _H1_Floor, _H1_Has_Elevator, _H1_Allows_Pets, _H1_Garden_Area, H1_Rent), _H1_Max_Rent),
+        House_2 = house_maxrent(house(_H2_House_Address, _H2_Sleeping_Quarters, _H2_Floor_Area, _H2_At_Center, _H2_Floor, _H2_Has_Elevator, _H2_Allows_Pets, _H2_Garden_Area, H2_Rent), _H2_Max_Rent),
 
         H1_Rent > H2_Rent, !.
 
 % Περίπτωση 2.1: Έχουν ίδια τιμή ενοικίου όμως, το πρώτο έχει μεγαλύτερο κήπο από το δεύτερο.
 pick_best_house(House_1, House_2, House_1) :-
         % Ανάλυση του πολύπλοκου συναρτησιακού όρου house_maxrent(house(House_Address, Sleeping_Quarters, Floor_Area, At_Center, Floor, Has_Elevator, Allows_Pets, Garden_Area, Rent), Max_Rent).
-        H1_Head = house_maxrent(house(_H1_House_Address, _H1_Sleeping_Quarters, H1_Floor_Area, _H1_At_Center, _H1_Floor, _H1_Has_Elevator, _H1_Allows_Pets, H1_Garden_Area, H1_Rent), _H1_Max_Rent),
-        H2_Head = house_maxrent(house(_H2_House_Address, _H2_Sleeping_Quarters, H2_Floor_Area, _H2_At_Center, _H2_Floor, _H2_Has_Elevator, _H2_Allows_Pets, H2_Garden_Area, H2_Rent), _H2_Max_Rent),
+        House_1 = house_maxrent(house(_H1_House_Address, _H1_Sleeping_Quarters, _H1_Floor_Area, _H1_At_Center, _H1_Floor, _H1_Has_Elevator, _H1_Allows_Pets, H1_Garden_Area, H1_Rent), _H1_Max_Rent),
+        House_2 = house_maxrent(house(_H2_House_Address, _H2_Sleeping_Quarters, _H2_Floor_Area, _H2_At_Center, _H2_Floor, _H2_Has_Elevator, _H2_Allows_Pets, H2_Garden_Area, H2_Rent), _H2_Max_Rent),
 
         H1_Rent =:= H2_Rent,
         H1_Garden_Area > H2_Garden_Area, !.
@@ -477,8 +477,8 @@ pick_best_house(House_1, House_2, House_1) :-
 % Περίπτωση 2.2: Έχουν ίδια τιμή ενοικίου όμως, το πρώτο έχει μικρότερο κήπο από το δεύτερο.
 pick_best_house(House_1, House_2, House_2) :-
         % Ανάλυση του πολύπλοκου συναρτησιακού όρου house_maxrent(house(House_Address, Sleeping_Quarters, Floor_Area, At_Center, Floor, Has_Elevator, Allows_Pets, Garden_Area, Rent), Max_Rent).
-        H1_Head = house_maxrent(house(_H1_House_Address, _H1_Sleeping_Quarters, H1_Floor_Area, _H1_At_Center, _H1_Floor, _H1_Has_Elevator, _H1_Allows_Pets, H1_Garden_Area, H1_Rent), _H1_Max_Rent),
-        H2_Head = house_maxrent(house(_H2_House_Address, _H2_Sleeping_Quarters, H2_Floor_Area, _H2_At_Center, _H2_Floor, _H2_Has_Elevator, _H2_Allows_Pets, H2_Garden_Area, H2_Rent), _H2_Max_Rent),
+        House_1 = house_maxrent(house(_H1_House_Address, _H1_Sleeping_Quarters, _H1_Floor_Area, _H1_At_Center, _H1_Floor, _H1_Has_Elevator, _H1_Allows_Pets, H1_Garden_Area, H1_Rent), _H1_Max_Rent),
+        House_2 = house_maxrent(house(_H2_House_Address, _H2_Sleeping_Quarters, _H2_Floor_Area, _H2_At_Center, _H2_Floor, _H2_Has_Elevator, _H2_Allows_Pets, H2_Garden_Area, H2_Rent), _H2_Max_Rent),
 
         H1_Rent =:= H2_Rent,
         H1_Garden_Area < H2_Garden_Area, !.
@@ -486,25 +486,32 @@ pick_best_house(House_1, House_2, House_2) :-
 % Περίπτωση 3.1: Έχουν ίδια τιμή ενοικίου και εμβαδό κήπου όμως, το πρώτο έχει μεγαλύτερο εμβαδό χώρου από το δεύτερο.
 pick_best_house(House_1, House_2, House_1) :-
         % Ανάλυση του πολύπλοκου συναρτησιακού όρου house_maxrent(house(House_Address, Sleeping_Quarters, Floor_Area, At_Center, Floor, Has_Elevator, Allows_Pets, Garden_Area, Rent), Max_Rent).
-        H1_Head = house_maxrent(house(_H1_House_Address, _H1_Sleeping_Quarters, H1_Floor_Area, _H1_At_Center, _H1_Floor, _H1_Has_Elevator, _H1_Allows_Pets, H1_Garden_Area, H1_Rent), _H1_Max_Rent),
-        H2_Head = house_maxrent(house(_H2_House_Address, _H2_Sleeping_Quarters, H2_Floor_Area, _H2_At_Center, _H2_Floor, _H2_Has_Elevator, _H2_Allows_Pets, H2_Garden_Area, H2_Rent), _H2_Max_Rent),
+        House_1 = house_maxrent(house(_H1_House_Address, _H1_Sleeping_Quarters, H1_Floor_Area, _H1_At_Center, _H1_Floor, _H1_Has_Elevator, _H1_Allows_Pets, H1_Garden_Area, H1_Rent), _H1_Max_Rent),
+        House_2 = house_maxrent(house(_H2_House_Address, _H2_Sleeping_Quarters, H2_Floor_Area, _H2_At_Center, _H2_Floor, _H2_Has_Elevator, _H2_Allows_Pets, H2_Garden_Area, H2_Rent), _H2_Max_Rent),
 
         H1_Rent =:= H2_Rent,
         H1_Garden_Area =:= H2_Garden_Area,
-        H1_Floor_Area > H2_Garden_Area, !.
+        H1_Floor_Area > H2_Floor_Area, !.
 
 % Περίπτωση 3.2: Έχουν ίδια τιμή ενοικίου και εμβαδό κήπου όμως, το πρώτο έχει μικρότερο εμβαδό χώρου από το δεύτερο.
 pick_best_house(House_1, House_2, House_2) :-
         % Ανάλυση του πολύπλοκου συναρτησιακού όρου house_maxrent(house(House_Address, Sleeping_Quarters, Floor_Area, At_Center, Floor, Has_Elevator, Allows_Pets, Garden_Area, Rent), Max_Rent).
-        H1_Head = house_maxrent(house(_H1_House_Address, _H1_Sleeping_Quarters, H1_Floor_Area, _H1_At_Center, _H1_Floor, _H1_Has_Elevator, _H1_Allows_Pets, H1_Garden_Area, H1_Rent), _H1_Max_Rent),
-        H2_Head = house_maxrent(house(_H2_House_Address, _H2_Sleeping_Quarters, H2_Floor_Area, _H2_At_Center, _H2_Floor, _H2_Has_Elevator, _H2_Allows_Pets, H2_Garden_Area, H2_Rent), _H2_Max_Rent),
+        House_1 = house_maxrent(house(_H1_House_Address, _H1_Sleeping_Quarters, H1_Floor_Area, _H1_At_Center, _H1_Floor, _H1_Has_Elevator, _H1_Allows_Pets, H1_Garden_Area, H1_Rent), _H1_Max_Rent),
+        House_2 = house_maxrent(house(_H2_House_Address, _H2_Sleeping_Quarters, H2_Floor_Area, _H2_At_Center, _H2_Floor, _H2_Has_Elevator, _H2_Allows_Pets, H2_Garden_Area, H2_Rent), _H2_Max_Rent),
 
         H1_Rent =:= H2_Rent,
         H1_Garden_Area =:= H2_Garden_Area,
-        H1_Floor_Area < H2_Garden_Area, !.
+        H1_Floor_Area < H2_Floor_Area, !.
 
 % Περίπτωση 4: Έχουν ίδια τιμή ενοικίου και εμβαδό κήπου και εμβαδό χώρου, επομένως θεωρούνται ισοδύναμα και επιστρέφεται (αυθαίρετα το πρώτο).
-pick_best_house(House_1, House_2, House_1).
+pick_best_house(House_1, House_2, House_1) :- 
+    % Ανάλυση του πολύπλοκου συναρτησιακού όρου house_maxrent(house(House_Address, Sleeping_Quarters, Floor_Area, At_Center, Floor, Has_Elevator, Allows_Pets, Garden_Area, Rent), Max_Rent).
+    House_1 = house_maxrent(house(_H1_House_Address, _H1_Sleeping_Quarters, H1_Floor_Area, _H1_At_Center, _H1_Floor, _H1_Has_Elevator, _H1_Allows_Pets, H1_Garden_Area, H1_Rent), _H1_Max_Rent),
+    House_2 = house_maxrent(house(_H2_House_Address, _H2_Sleeping_Quarters, H2_Floor_Area, _H2_At_Center, _H2_Floor, _H2_Has_Elevator, _H2_Allows_Pets, H2_Garden_Area, H2_Rent), _H2_Max_Rent),
+
+    H1_Rent =:= H2_Rent,
+    H1_Garden_Area =:= H2_Garden_Area,
+    H1_Floor_Area =:= H2_Floor_Area.
 
 % Περίπτωση δύο κενών λιστών: Η ένωση δύο (ταξινομημένων) κενών λιστών είναι ταξινομημένη (κενή) λίστα.
 merge_houses_best_top([], [], []).
@@ -531,13 +538,18 @@ merge_houses_best_top([L_Head | L_Tail], [R_Head | R_Tail], [R_Head | Sub_Result
 %% sort_houses_best_top(House_Max_Rent_List, Sorted_House_Max_Rent_List).
 %% Ταξινομεί και επιστρέφει μία (όχι απαραίτητα γνησίως) φθίνουσα ταξινομημένη λίστα ζευγών σπιτιών και μέγιστου ενοικίου για αυτά όπου στην κορυφή βρίσκεται το καλύτερο σπίτι και στο τελευταίο στοιχείο το λιγότερο καλύτερο,
 %% σύμφωνα με τις κοινές-για-όλους προτιμήσεις.
+
 % (Τερματική) Περίπτωση κενής λίστας: Θεωρείται ήδη ταξινομημένη.
-sort_houses_best_top([], []).
+sort_houses_best_top([], []) :- !. % Το ! είναι απαραίτητο διότι χωρίς αυτό εντοπίζονται άπειρες ίσες λύσεις με επόμενο κανόνα (η κενή λίστα μπορεί να σπάσει σε άπειρες κενές λίστες).
+
+% (Τερματική) Περίπτωση λίστας με μοναδικό στοιχείο: Θεωρείται ήδη ταξινομημένη.
+% Το ! είναι απαραίτητο διότι χωρίς αυτό εντοπίζονται άπειρες ίσες λύσεις με τον επόμενο κανόνα (λίστα ενός στοιχείου μπορεί πάντα να σπάσει σε μία κενή και σε μία με ένα στοιχείο εκείνο).
+sort_houses_best_top([Unitary_Element], [Unitary_Element]) :- !. 
 
 % Γενική συνθήκη: Ταξινομώ τις δύο υπολίστες και ενώνω το αποτέλεσμα τους.
 sort_houses_best_top(House_Max_Rent_List, Sorted_House_Max_Rent_List) :-
     % Χωρίζω την λίστα σε δύο (περίπου ίσα) μέρη: Left_Sublist και Right_Sublist.
-    sublist(Left_Sublist, Right_Sublist, House_Max_Rent_List),
+    append(Left_Sublist, Right_Sublist, House_Max_Rent_List),
     % Οι δύο υπολίστες πρέπει να έχουν το ίδιο μήκος αν η αρχική λίστα έχει άρτιο μήκος, διαφορετικά η μία θα έχει ένα παραπάνω στοιχείο
     length(Left_Sublist, Len),(length(Right_Sublist, Len); R_Len is Len + 1, length(Right_Sublist, R_Len)),
 
@@ -547,11 +559,38 @@ sort_houses_best_top(House_Max_Rent_List, Sorted_House_Max_Rent_List) :-
     merge_houses_best_top(Sorted_Left_Sublist, Sorted_Right_Sublist, Sorted_House_Max_Rent_List).
 
 /* ---------------------------------------------------------- *|
-|* --        Εύρεση αντιστοίχησης καλύτερων σπιτιών        -- *|
+|* --        Εύρεση αντιστοίχισης καλύτερων σπιτιών        -- *|
 |* -- σε πελάτες όπου διατίθενται να πληρώσουν περισσότερο -- *|
 |* ---------------------------------------------------------- */
 
-% Αυτή η διαδικασία θα γίνει μέσω του (τροποποιημένου) αλγορίθμου Gale-Shapley για εύρεση ευσταθών ζευγών.
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [   Σχόλια - Τρόπος σκέψης για το τμήμα αυτό   ] ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ %
+% Αυτό το τμήμα αναπτύσσεται για να υποστηρίξει την 3η λειτουργία του προγράμματος, δηλαδή αυτή της επιλογής πελατών για κάθε σπίτι                                                                                         %
+% βάσει δημοπρασίας.                                                                                                                                                                                                        %
+%                                                                                                                                                                                                                           %
+% Στην λειτουργία αυτή:                                                                                                                                                                                                     %
+%     1) Όταν υπάρχουν σπίτια τα οποία "διεκδικεί" μόνο ένας υποψήφιος ενοικιαστής ((δηλαδή σπίτια που προτείνονται ως "προτιμότερα" μόνο για αυτούς), τότε προφανώς αυτά κατοχυρώνονται σε εκείνους.                       %
+%     2) Όταν υπάρχουν σπίτια τα οποία "διεκδικούν" παραπάνω από ένας υποψήφιοι ενοικιαστές (δηλαδή σπίτια που προτείνονται ως "προτιμότερα" για παραπάνω από έναν                                                          %
+%       ενοικιαστές), τότε το πρόγραμμα θα "κατοχυρώνει" κάθε διεκδικούμενο σπίτι στον πλειοδότη, δηλαδή σε αυτόν που είναι διατεθειμένος να προσφέρει το μεγαλύτερο ενοίκιο,                                               %
+%       και οι υπόλοιποι θα πρέπει να "διεκδικήσουν" ένα από τα υπόλοιπα σπίτια που πληρούν τις απαιτήσεις τους, ξεκινώντας από το (επόμενο) προτιμότερο (δηλαδή αυτό που είναι επόμενο στην φθίνουσα λίστα προτιμήσεων).   %
+%     3) Η διαδικασία τερματίζει όταν όλοι οι υποψήφιοι ενοικιαστές έχουν κατοχυρώσει κάποιο σπίτι ή αν δεν μπορεί να κατοχυρωθεί κανένα σπίτι για αυτούς.                                                                  %
+%                                                                                                                                                                                                                           %
+%                                                                                                                                                                                                                           %
+% Η διαδικασία επιλογής (1 και 2 παραπάνω) μπορεί να πραγματοποιηθεί μέσω του αλγορίθμου Gale-Shapley όπου η μεριά που "κάνει πρόταση" είναι εκείνη των υποψήφιων ενοικιαστών (με λίστα προτίμησης εκείνη που απαριθμεί     %
+% τα σπίτια που ικανοποιούν τις απαιτήσεις σε φθίνουσα προτίμηση, σύμφωνα με τις κοινές-για-όλους προτιμήσεις). Όσο για την πλευρά που "δέχεται προτάσεις", που είναι τα διαμερίσματα, η λίστα προτίμησης δεν υπάρχει ρητά, %
+% αλλά υπονοείται εφόσον προτιμάται πάντα ο ενοικιαστής που προσφέρει μεγαλύτερο ποσό ενοικίου.                                                                                                                             %
+%                                                                                                                                                                                                                           %
+% Επίσης, μέσω της τροποποίησης που έγινε παρακάτω, κάποιος πελάτης για τον οποίο δεν μπορεί να κατοχυρωθεί κανένα σπίτι, θεωρείται ότι κατοχύρωσε ψευδο-σπίτι όπου σε επόμενο στάδιο θα γίνει η κατάλληλη επεξεργασία για  %
+% αντιμετώπιση αυτής της περίπτωσης.                                                                                                                                                                                        %
+%                                                                                                                                                                                                                           %
+% Ο αλγόριθμος αυτός, βρίσκει τα βέλτιστα για τους πελάτες (δηλαδή το σύνολο των πελατών θα έχει τα όσο δυνατόν πιο ικανοποιητικά σπίτια) ευσταθή ζεύγη όπου στο κάθε πελάτη προτείνεται να νοικιάσει το σπίτι το οποίο τον %
+% ικανοποιεί περισσότερο από άλλα και για το οποίο κερδίζει τον πλειστηριασμό, δηλαδή διατίθεται να δώσει μεγαλύτερο ενοίκιο από άλλους πιθανούς ενοικιαστές, όπου είναι αυτό το οποίο ζητείται να βρεθεί από την εκφώνηση. %
+%                                                                                                                                                                                                                           %
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ %
+
+%% pick_best_customer_for_house/3
+%% pick_best_customer_for_house(House_Maxrent1, House_Maxrent2, MaxRent_House_Maxrent).
+%% Αληθεύει εφόσον το MaxRent_House_Maxrent είναι το house_maxrent(House, Max_rent) με το μεγαλύτερο Max_rent.
+%% Στην πράξη (ο τρόπος με το οποίο χρησιμοποιείται) είναι να "δίνεται σαν είσοδος" δύο ζεύγη house_maxrent(House, Max_rent) και ως MaxRent_House_Maxrent να "επιστρέφεται" εκείνο με το μεγαλύτερο Max_rent.
 
 % Περίπτωση που ο πρώτος πελάτης είναι "καλύτερος" (διαθέτει μεγαλύτερο ενοίκιο) του δεύτερου.
 pick_best_customer_for_house(House_Maxrent1, House_Maxrent2, House_Maxrent1) :-
@@ -569,59 +608,74 @@ pick_best_customer_for_house(House_Maxrent1, House_Maxrent2, House_Maxrent2) :-
 
 %% stable_renter_house_matching/4
 %% stable_renter_house_matching(Customer_HouseList, Number_Of_Customers, Current_Matches_List, Best_Matches_List).
-%% Δέχεται σαν είσοδο μία λίστα από συναρτησιακούς όρους customer_house(Customer, [house_maxrent(house/9, max_rent), ...]) όπου Name το όνομα του πιθανού ενοικιαστή και [house_maxrent(house/9, max_rent), ...]
-%%  λίστα με ζεύγη σπιτιών που ικανοποιούν τις απαιτήσεις του (house/9) και max_rent το μέγιστο ενοίκιο που διατίθεται να δώσει για αυτό το σπίτι.
-%% Επιστρέφει μία λίστα (Best_Matches_List) με ζεύγη customer_house_match(house_maxrent(house/9, max_rent), renter) όπου το house είναι το σπίτι (με διατιθέμενο ενοίκιο max_rent)  που ο ενοικιαστής renter δίνεται να νοικιάζει στο τέλος του πλειστηριασμού.
+%% Δέχεται σαν είσοδο μία λίστα από συναρτησιακούς όρους customer_house(Customer, [house_maxrent(house, max_rent), ...]) όπου Customer ο πιθανός ενοικιαστής και [house_maxrent(house, max_rent), ...]
+%%  λίστα με ζεύγη σπιτιών που ικανοποιούν τις απαιτήσεις του (house) και max_rent το μέγιστο ενοίκιο που διατίθεται να δώσει για αυτό το σπίτι, η οποία είναι φθίνουσα ταξινομημένη ως προς τα κοινά προς όλους κριτήρια καλύτερου διαμερίσματος.
+%% Επιστρέφει μία λίστα (Best_Matches_List) με ζεύγη customer_house_match(house_maxrent(house, max_rent), renter) όπου το house είναι το σπίτι (με διατιθέμενο ενοίκιο max_rent) που ο ενοικιαστής renter καταλήγει να νοικιάζει στο τέλος του πλειστηριασμού.
 %% Το Current_Matches_List "αποθηκεύει" το προσωρινό αποτέλεσμα της Best_Matches_List για κάθε βήμα.
-%% Η μεταβλητή είναι βοηθητική και είναι ίση με το αριθμό των πελατών που θέλουμε να αντιστοιχίσουμε με σπίτια.
-
-
+%% Η μεταβλητή Number_Of_Customers είναι βοηθητική και είναι ίση με το αριθμό των πελατών που θέλουμε να αντιστοιχίσουμε με σπίτια.
 
 % Τερματική συνθήκη 1: περίπτωση κενής λίστας με πελάτες προς αναζήτηση (δεν βρήκε κανενας βέλτιστο σπίτι), επιστρέφω το τρέχον προσωρινό ως βέλτιστο.
-stable_renter_house_matching([], _Number_Of_Customers, Current_Matches_List, Current_Matches_List).
+stable_renter_house_matching([], _Number_Of_Customers, Current_Matches_List, Current_Matches_List) :- !.
 
-% Τερματική συνθήκη 2: αριθμός πελατών ίσος με αριθμό ζευγών: Τότε κάθε πελάτης έχει κάποιο ζευγάρι (εφόσον μόνο να προσθέτω και να τροποιώ ζευγάρια μπορώ) που είναι η τερματική συνθήκη του Gale-Shapley.
-stable_renter_house_matching(_Customer_HouseList, Number_Of_Customers, Current_Matches_List, Current_Matches_List) :- length(Current_Matches_List, Number_Of_Customers).
+% Τερματική συνθήκη 2: αριθμός πελατών ίσος με αριθμό ζευγών: Τότε κάθε πελάτης έχει κάποιο ζευγάρι (εφόσον μόνο να προσθέτω και να τροποποιώ ζευγάρια μόνο) που είναι η τερματική συνθήκη του Gale-Shapley.
+stable_renter_house_matching(_Customer_HouseList, Number_Of_Customers, Current_Matches_List, Current_Matches_List) :- length(Current_Matches_List, Number_Of_Customers), !.
 
-% Περίπτωση που ο τρέχον πελάτης έχει ελέγξει όλα τα συμβατά με τις απαιτήσεις του σπίτια και δεν υπήρξε κανένα διαθέσιμο στο τελος (τότε έχει κενή λίστα με σπίτια στο customer_house).
-stable_renter_house_matching([Customer_House | Rest], Current_Matches, Best_Matches) :-
+% Περίπτωση που ο πελάτης έχει ήδη δεσμεύσει σπίτι: Δεν πρέπει να προχωρήσει σε νέο ζεύγος εφόσον έχει ήδη, οπότε τοποθετείται στο τέλος της λίστας πελατών για να επεξεργαστούμε τον επόμενο και (σταδιακά) να 
+%  ανέλθει στη κορυφή κάποιος που δεν έχει ζεύγος για να συνεχίσει η διαδικασία.
+stable_renter_house_matching([Customer_House | Rest], Number_Of_Customers, Current_Matches, Best_Matches) :-
     % "Ξεπακετάρισμα" του συναρτησιακού όρου.
-    % "Διαλέγω" το πιο επιθυμητό σπίτι για τον ενοικιαστή.
-    Customer_House = customer_house(Customer, []), !, %%% ==================--- TODO: Maybe not '!' ---==================.
+    Customer_House = customer_house(Customer, _HouseList),
 
-    % Σε αυτή την περίπτωση, ο ενοικιαστής δεν θα ανατεθεί σε σπίτι, επομένως κάνουμε μία ψευδο-ανάθεση σε ένα σπίτι με διεύθυνση ότι δεν βρέθηκαν σπίτια και απλά ο πελάτης θα αφαιρεθεί από την
-    % λίστα των πελατών για τους οποίους "ψάχνουμε" βέλτιστα δυνατά διαμερίσματα.
+    % Απαιτώ ο πελάτης να έχει ήδη κάποιο διαμέρισμα ως "ζεύγος".
+    member(customer_house_match(_Some_House, Customer), Current_Matches),
+
+    % Αφού το ενοικιαστής στην κορυφή έχει ήδη ζεύγος τον τοποθετώ στο τέλος της λίστας για να βρεθεί στην κορυφή ο επόμενος προς έλεγχο.
+    append(Rest, [Customer_House], New_Customer_House),
 
     % Αναδρομικό βήμα: Η βέλτιστη λύση του επόμενου βήματος και η βέλτιστη του τωρινού.
-    stable_renter_house_matching(Rest, Number_Of_Customers, [customer_house_match(house_maxrent(no_house, -1), Customer) | Rest_Current_Matches], Best_Matches).
+    stable_renter_house_matching(New_Customer_House, Number_Of_Customers, Current_Matches, Best_Matches), !. % To ! γιατί η αναίρεση αυτού του κανόνα μπορεί να οδηγήσει σε επόμενα ζεύγη που δεν είναι ευσταθή (επομένως λάθος λύσεις).
+
+% Περίπτωση που ο τρέχον πελάτης έχει ελέγξει όλα τα συμβατά με τις απαιτήσεις του σπίτια και δεν υπήρξε κανένα διαθέσιμο στο τελος (τότε έχει κενή λίστα με σπίτια στο customer_house).
+stable_renter_house_matching([Customer_House | Rest], Number_Of_Customers, Current_Matches, Best_Matches) :-
+    % "Ξεπακετάρισμα" του συναρτησιακού όρου.
+    % Απαιτώ ο ενοικιαστής να έχει κενή λίστα με ικανοποιητικά σπίτια προς έλεγχο.
+    Customer_House = customer_house(Customer, []),
+
+    % Σε αυτή την περίπτωση, ο ενοικιαστής δεν θα ανατεθεί σε σπίτι, επομένως κάνουμε μία ψευδο-ανάθεση σε ένα ψευδο-σπίτι που δηλώνει ότι δεν βρέθηκαν σπίτια και απλά ο πελάτης θα αφαιρεθεί από την
+    % λίστα των πελατών για τους οποίους "ψάχνουμε" βέλτιστα δυνατά διαμερίσματα.
+
+    % Αναδρομικό βήμα: Η βέλτιστη λύση του επόμενου βήματος θα είναι και η βέλτιστη του τωρινού.
+    stable_renter_house_matching(Rest, Number_Of_Customers, [customer_house_match(house_maxrent(no_house, -1), Customer) | Current_Matches], Best_Matches), !.
+     % To ! γιατί η αναίρεση αυτού του κανόνα μπορεί να οδηγήσει σε επόμενα ζεύγη που δεν είναι ευσταθή (επομένως λάθος λύσεις).
 
 % Περίπτωση που το πιο επιθυμητό σπίτι είναι (προσωρινά) "δεσμευμένο" από άλλον ενοικιαστή και ο "τρέχον" πελάτης προτείνει μεγαλύτερο ενοίκιο από τον ήδη υπάρχον του ζεύγους.
-stable_renter_house_matching([Customer_House | Rest], Current_Matches, Best_Matches) :-
+stable_renter_house_matching([Customer_House | Rest], Number_Of_Customers, Current_Matches, Best_Matches) :-
     % "Ξεπακετάρισμα" του συναρτησιακού όρου.
     % "Διαλέγω" το πιο επιθυμητό σπίτι για τον ενοικιαστή.
     Customer_House = customer_house(Customer, [house_maxrent(House, Max_rent) | Rest_House_Max_Rent]),
 
     % "Ελέγχω" (θεωρώ δεδομένο ότι) αν υπάρχει το σπίτι House σε "δεσμό" με άλλο πελάτη.
-    select(customer_house_match(house_maxrent(House, Other_Max_rent), Other_Renter), Current_Matches, Rest_Current_Matches), !, %%% ==================--- TODO: Maybe not '!' ---==================.
+    select(customer_house_match(house_maxrent(House, Other_Max_rent), _Other_Renter), Current_Matches, Rest_Current_Matches),
 
     % "Συγκρίνω" τα προσφερόμενα ενοίκια και διαλέγω το μεγαλύτερο από αυτά.
-    pick_best_customer_for_house(house_maxrent(House, Other_Max_rent), house_maxrent(House, Max_rent), house_maxrent(House, Max_rent)),
+    pick_best_customer_for_house(house_maxrent(House, Other_Max_rent), house_maxrent(House, Max_rent), house_maxrent(House, Max_rent)), 
     % Άρα, θα αντικαταστήσω το υπάρχον ζεύγος με το νέο καλύτερο.
 
     % Αφού βρήκα (προσωρινό) ζεύγος για αυτόν τον πελάτη, τον τοποθετώ στο τέλος της λίστας ενώ "σημειώνω" (αφαιρώ από την λίστα) εκείνο το σπίτι το οποίο ελέγχθηκε.
     append(Rest, [customer_house(Customer, Rest_House_Max_Rent)], New_Customer_House),
 
-    % Αναδρομικό βήμα: Η βέλτιστη λύση του επόμενου βήματος και η βέλτιστη του τωρινού.
-    stable_renter_house_matching(New_Customer_House, Number_Of_Customers, [customer_house_match(house_maxrent(House, Max_rent), Customer) | Rest_Current_Matches], Best_Matches).
+    % Αναδρομικό βήμα: Η βέλτιστη λύση του επόμενου βήματος θα είναι και η βέλτιστη του τωρινού.
+    stable_renter_house_matching(New_Customer_House, Number_Of_Customers, [customer_house_match(house_maxrent(House, Max_rent), Customer) | Rest_Current_Matches], Best_Matches), !.
+    % To ! γιατί η αναίρεση αυτού του κανόνα μπορεί να οδηγήσει σε επόμενα ζεύγη που δεν είναι ευσταθή (επομένως λάθος λύσεις).
 
 % Περίπτωση που το πιο επιθυμητό σπίτι είναι (προσωρινά) "δεσμευμένο" από άλλον ενοικιαστή και ο "τρέχον" πελάτης προτείνει μικρότερο ενοίκιο από τον ήδη υπάρχον του ζεύγους.
-stable_renter_house_matching([Customer_House | Rest], Current_Matches, Best_Matches) :-
+stable_renter_house_matching([Customer_House | Rest], Number_Of_Customers, Current_Matches, Best_Matches) :-
     % "Ξεπακετάρισμα" του συναρτησιακού όρου.
     % "Διαλέγω" το πιο επιθυμητό σπίτι για τον ενοικιαστή.
     Customer_House = customer_house(Customer, [house_maxrent(House, Max_rent) | Rest_House_Max_Rent]),
 
     % "Ελέγχω" (θεωρώ δεδομένο ότι) αν υπάρχει το σπίτι House σε "δεσμό" με άλλο πελάτη.
-    select(customer_house_match(house_maxrent(House, Other_Max_rent), Other_Renter), Current_Matches, Rest_Current_Matches), !, %%% ==================--- TODO: Maybe not '!' ---==================.
+    select(customer_house_match(house_maxrent(House, Other_Max_rent), _Other_Renter), Current_Matches, Rest_Current_Matches),
 
     % "Συγκρίνω" τα προσφερόμενα ενοίκια και διαλέγω το μεγαλύτερο από αυτά.
     pick_best_customer_for_house(house_maxrent(House, Other_Max_rent), house_maxrent(House, Max_rent), house_maxrent(House, Other_Max_rent)),
@@ -630,11 +684,12 @@ stable_renter_house_matching([Customer_House | Rest], Current_Matches, Best_Matc
     % Αφού βρήκα (προσωρινό) ζεύγος για αυτόν τον πελάτη, δεν τον τοποθετώ στο τέλος της λίστας και "επιμένω" σε αυτόν μέχρι είτε να βρώ ζεύγος είτε να μην υπάρχουν άλλα συμβατά σπίτια διαθέσιμα για αυτόν τον ενοικιαστή.
     % Παράλληλα, "σημειώνω" (αφαιρώ από την λίστα) εκείνο το σπίτι το οποίο ελέγχθηκε.
 
-    % Αναδρομικό βήμα: Η βέλτιστη λύση του επόμενου βήματος και η βέλτιστη του τωρινού.
-    stable_renter_house_matching([customer_house(Customer, Rest_House_Max_Rent) | Rest], Number_Of_Customers, [customer_house_match(house_maxrent(House, Max_rent), Customer) | Rest_Current_Matches], Best_Matches).
+    % Αναδρομικό βήμα: Η βέλτιστη λύση του επόμενου βήματος θα είναι και η βέλτιστη του τωρινού.
+    stable_renter_house_matching([customer_house(Customer, Rest_House_Max_Rent) | Rest], Number_Of_Customers, [customer_house_match(house_maxrent(House, Max_rent), Customer) | Rest_Current_Matches], Best_Matches), !.
+    % To ! γιατί η αναίρεση αυτού του κανόνα μπορεί να οδηγήσει σε επόμενα ζεύγη που δεν είναι ευσταθή (επομένως λάθος λύσεις).
 
 % Περίπτωση που το πιο επιθυμητό σπίτι δεν είναι "δεσμευμένο" από κανέναν ενοικιαστή.
-stable_renter_house_matching([Customer_House | Rest], Current_Matches, Best_Matches) :-
+stable_renter_house_matching([Customer_House | Rest], Number_Of_Customers, Current_Matches, Best_Matches) :-
     % "Ξεπακετάρισμα" του συναρτησιακού όρου.
     % "Διαλέγω" το πιο επιθυμητό σπίτι για τον ενοικιαστή.
     Customer_House = customer_house(Customer, [house_maxrent(House, Max_rent) | Rest_House_Max_Rent]),
@@ -644,7 +699,7 @@ stable_renter_house_matching([Customer_House | Rest], Current_Matches, Best_Matc
     % Αφού βρήκα (προσωρινό) ζεύγος για αυτόν τον πελάτη, τον τοποθετώ στο τέλος της λίστας ενώ "σημειώνω" (αφαιρώ από την λίστα) εκείνο το σπίτι το οποίο ελέγχθηκε.
     append(Rest, [customer_house(Customer, Rest_House_Max_Rent)], New_Customer_House),
 
-    % Αναδρομικό βήμα: Η βέλτιστη λύση του επόμενου βήματος και η βέλτιστη του τωρινού.
+    % Αναδρομικό βήμα: Η βέλτιστη λύση του επόμενου βήματος θα είναι και η βέλτιστη του τωρινού.
     stable_renter_house_matching(New_Customer_House, Number_Of_Customers, [customer_house_match(house_maxrent(House, Max_rent), Customer) | Current_Matches], Best_Matches).
     
 
