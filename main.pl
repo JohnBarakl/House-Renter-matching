@@ -13,17 +13,17 @@ ensure_right_menu_selection(3, 3).
 ensure_right_menu_selection(0, 0).
 ensure_right_menu_selection(_, Y) :-
     % Αν η επιλογή του χρήστη δεν είναι κάποια από τις παραπάνω, τότε τυπώνεται μήνυμα και να επανέρχεται το πρόγραμμα στο μενού.
-    write('Επίλεξε έναν αριθμό μεταξύ 0 έως 3!'), nl,
+    write('Επίλεξε έναν αριθμό μεταξύ 0 έως 3!'), nl, nl, nl,
 
     print_menu,
     % Διαβάζω νέα επιλογή.
-    read(X), nl,
+    read(X), nl, nl,
     ensure_right_menu_selection(X, Y).
 
 % Διαβάζει την επιλογή (μενού) του χρήστη και την "επιστρέφει", αν είναι σωστή.
 % Διαφορετικά, την ζητάει επαναληπτικά μέχρι να είναι ορθή.
 safe_read_menu_selection(X) :-
-    read(Temp), nl, 
+    read(Temp), nl, nl,
     ensure_right_menu_selection(Temp, X).
 
 
@@ -44,9 +44,9 @@ print_menu :-
     nl,
     write("Επιλογή: ").
 
-/* -------------------------------- *|
-|* -- Εκτύπωση στοιχείων σπιτιών -- *|
-|* -------------------------------- */ 
+/* ------------------------------------------ *|
+|* -- Εκτύπωση στοιχείων σπιτιών - Πελατών -- *|
+|* ------------------------------------------ */ 
 
 %% print_house/1
 %% print_house(House).
@@ -99,14 +99,14 @@ print_best_addresses([Address | Rest]) :-
     print_best_addresses(Rest).
 
 
-%% print_all_renter_matces/1
-%% print_all_renter_matces(Renter_Name_List)
-%% Δέχεται σαν είσοδο μία λίστα με πελάτες και για τον κάθε ένα θα τυπώνει το όνομα του και τα συμβατά σπίτια καθώς και το προτεινόμενο προς ενοικίαση.
+%% find_and_print_all_renter_matches/1
+%% find_and_print_all_renter_matches(Renter_Name_List)
+%% Δέχεται σαν είσοδο μία λίστα με πελάτες και για τον κάθε ένα θα τυπώνει το όνομα του και τα συμβατά σπίτια (τα οποία εντοπίζονται) καθώς και το προτεινόμενο προς ενοικίαση.
 
 % Τερματική συνθήκη: Κενή λίστα, απλά αληθεύει.
-print_all_renter_matces([]).
+find_and_print_all_renter_matches([]).
 
-print_all_renter_matces([Renter_Name | Rest]) :-
+find_and_print_all_renter_matches([Renter_Name | Rest]) :-
     % Βρίσκω τα καλύτερα σπίτια και την διεύθυνση του καλύτερου.
     mode_2(Renter_Name, Compatible_Houses, Best_House_Addr),
 
@@ -117,8 +117,34 @@ print_all_renter_matces([Renter_Name | Rest]) :-
     print_houses(Compatible_Houses), nl,
     print_best_addresses(Best_House_Addr), nl, nl,
 
-    print_all_renter_matces(Rest).
-    
+    find_and_print_all_renter_matches(Rest).
+
+%% print_action_results/1
+%% print_action_results(Matches).
+%% Εκτυπώνει τα αποτελέσματα του πλειστηριασμού που υπολογίστηκαν και αποθηκεύτηκαν στην λίστα Matches που περιέχει στοιχεία renter_name_house_addr(name, addr).
+
+% Σε κενή λίστα δεν τυπώνω τίποτα και έχω επιτυχία.
+print_action_results([]).
+
+% Περίπτωση όπου ο ενοικιαστής που βρίσκεται στην κορυφή της λίστας δεν έχει αντιστοιχηθεί σε σπίτι.
+print_action_results([Name_Addr | Rest]) :-
+    % Εξαγωγή στοιχείων και απαίτηση να μην υπάρχει αντιστοίχιση.
+    Name_Addr = renter_name_house_addr(Name, no_house), !, % Το '!' είναι απαραίτητο γιατί η εναλλακτική περίπτωση θα "γράψει" ότι νοικιάζει το "no_house"!
+
+    write("Ο πελάτης "), write(Name), write(" δεν θα νοικιάσει κάποιο διαμέρισμα!"), nl,
+
+    print_action_results(Rest).
+
+% Κανονική περίπτωση όπου ο ενοικιαστής που βρίσκεται στην κορυφή της λίστας και έχει αντιστοιχηθεί σε σπίτι.
+print_action_results([Name_Addr | Rest]) :-
+    % Εξαγωγή στοιχείων και απαίτηση να μην υπάρχει αντιστοίχιση.
+    Name_Addr = renter_name_house_addr(Name, Addr), !, % Το '!' είναι απαραίτητο γιατί η εναλλακτική περίπτωση θα "γράψει" ότι νοικιάζει το "no_house"!
+
+    write("Ο πελάτης "), write(Name), write(" θα νοικιάσει το διαμέρισμα στην διεύθυνση: "), write(Addr), nl,
+
+    print_action_results(Rest).
+
+
 
 /* -------------------------- *|
 |* -- Εκτέλεση λειτουργιών -- *|
@@ -152,12 +178,22 @@ function(1) :-
 function(2) :- 
     % Βρίσκω τα ονόματα όλων των πελατών.
     findall(Name, request(Name, _, _, _, _, _, _, _, _, _), Name_List),
-    print_all_renter_matces(Name_List).
+
+    % Εύρεση και εκτύπωση αποτελεσμάτων για κάθε ενοικιαστή.
+    find_and_print_all_renter_matches(Name_List).
 
 
 % Εκτέλεση λειτουργίας δημοπρασίας.
 function(3) :- 
-    write("Test function 3!"), nl.
+    % Βρίσκω τα ονόματα όλων των ενοικιαστών για τους οποίους πρέπει να εκτελεστεί πλειστηριασμός.
+    findall(Name, request(Name, _, _, _, _, _, _, _, _, _), Name_List),
+
+    % Εκτέλεση "πλειστηριασμού"
+    mode_3(Name_List, Resulting_Matches), 
+    
+    print_action_results(Resulting_Matches), nl, nl.
+
+
 
 /* --------------------------------------------------- *|
 |* -- Επαναληπτική επιλογή λειτουργίας και εκτέλεση -- *|
@@ -210,32 +246,3 @@ run :-
 
     % Εκκίνηση κυρίως προγράμματος.
     begin(Execution_mode).
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TODO: REMOVE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-debug_3(Request_HouseList) :-
-    load_external_data,
-
-    /*
-    % request(Name, Min_Area, Min_Sleeping_Quarters, Req_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden).
-
-    request("John Smith",,,,,,,,5,2).
-
-    */
-
-    findall(Name, request(Name, _, _, _, _, _, _, _, _, _), Name_List),
-    findall(X, db_3_sub(X, Name_List), Request_HouseList).
-
-
-
-db_3_sub(request_house(Name, Sorted_House_Max_Rent_List), [Name | _Rest_Names]) :-
-    request(Name, Min_Area, Min_Sleeping_Quarters, Req_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden),
-    compatible_houses_w_maxrent(Min_Area, Min_Sleeping_Quarters, Req_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden, _House_List, House_Maxrent_List),
-    sort_houses_best_top(House_Maxrent_List, Sorted_House_Max_Rent_List).
-    
-db_3_sub(RH, [_Name | Rest_Names]) :-
-    db_3_sub(RH, Rest_Names).
- 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TODO: REMOVE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-

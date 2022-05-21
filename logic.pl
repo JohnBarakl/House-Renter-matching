@@ -603,26 +603,10 @@ pick_best_request_for_house(House_Maxrent1, House_Maxrent2, House_Maxrent2) :-
     House_Maxrent2 = house_maxrent(House, Max_rent2), !,
     Max_rent1 < Max_rent2. 
 
-%% stable_renter_house_matching/2
-%% stable_renter_house_matching_aux(Request_HouseList, Best_Matches_List).
-%% Δέχεται σαν είσοδο μία λίστα από συναρτησιακούς όρους request_house(Request, [house_maxrent(house, max_rent), ...]) όπου Request ο πιθανός ενοικιαστής και [house_maxrent(house, max_rent), ...]
-%%  λίστα με ζεύγη σπιτιών που ικανοποιούν τις απαιτήσεις του (house) και max_rent το μέγιστο ενοίκιο που διατίθεται να δώσει για αυτό το σπίτι, η οποία είναι φθίνουσα ταξινομημένη ως προς τα κοινά προς όλους κριτήρια καλύτερου διαμερίσματος.
-%% Επιστρέφει μία λίστα (Best_Matches_List) με ζεύγη request_house_match(house_maxrent(house, max_rent), renter) όπου το house είναι το σπίτι (με διατιθέμενο ενοίκιο max_rent) που ο ενοικιαστής renter καταλήγει να νοικιάζει στο τέλος του πλειστηριασμού.
-%% Το κύριο έργο πραγματοποιείται από το βοηθητικό κατηγόρημα stable_renter_house_matching_aux/4, όπου το τρέχον απλά αρχικοποιεί μεταβλητές του βοηθητικού.
-
-% Τερματική συνθήκη: περίπτωση κενής λίστας με πελάτες προς αναζήτηση (δόθηκε κενή λίστα πελατών), απλά αποτυγχάνει γιατί αφενός δεν είναι έγκυρη ενέργεια και αφετέρου για να "προστατέψει" το κατηγόρημα.
-stable_renter_house_matching_aux([], _Number_Of_Requests, Current_Matches_List, Current_Matches_List) :- fail.
-
-% Αρχικοποίηση μεταβλητών και εκκίνηση διαδικασίας.
-stable_renter_house_matching(Request_HouseList, Best_Matches_List) :-
-    % Υπολογισμός μήκους.
-    length(Request_HouseList, Number_Of_Requests),
-    stable_renter_house_matching_aux(Request_HouseList, Number_Of_Requests, [], Best_Matches_List).
-
 %% stable_renter_house_matching_aux/4
 %% stable_renter_house_matching_aux(Request_HouseList, Number_Of_Requests, Current_Matches_List, Best_Matches_List).
 %% Βοηθητικό κατηγόρημα του stable_renter_house_matching/2 που υλοποιεί τους υπολογισμούς και του επιστρέφει το αποτέλεσμα.
-%% Δέχεται σαν είσοδο μία λίστα από συναρτησιακούς όρους request_house(Request, [house_maxrent(house, max_rent), ...]) όπου Request ο πιθανός ενοικιαστής και [house_maxrent(house, max_rent), ...]
+%% Δέχεται σαν είσοδο μία λίστα από συναρτησιακούς όρους request_house([house_maxrent(house, max_rent), ...], Request) όπου Request ο πιθανός ενοικιαστής και [house_maxrent(house, max_rent), ...]
 %%  λίστα με ζεύγη σπιτιών που ικανοποιούν τις απαιτήσεις του (house) και max_rent το μέγιστο ενοίκιο που διατίθεται να δώσει για αυτό το σπίτι, η οποία είναι φθίνουσα ταξινομημένη ως προς τα κοινά προς όλους κριτήρια καλύτερου διαμερίσματος.
 %% Επιστρέφει μία λίστα (Best_Matches_List) με ζεύγη request_house_match(house_maxrent(house, max_rent), renter) όπου το house είναι το σπίτι (με διατιθέμενο ενοίκιο max_rent) που ο ενοικιαστής renter καταλήγει να νοικιάζει στο τέλος του πλειστηριασμού.
 %% Το Current_Matches_List "αποθηκεύει" το προσωρινό αποτέλεσμα της Best_Matches_List για κάθε βήμα.
@@ -716,8 +700,21 @@ stable_renter_house_matching_aux([Request_House | Rest], Number_Of_Requests, Cur
     % Αναδρομικό βήμα: Η βέλτιστη λύση του επόμενου βήματος θα είναι και η βέλτιστη του τωρινού.
     stable_renter_house_matching_aux(New_Request_House, Number_Of_Requests, [request_house_match(house_maxrent(House, Max_rent), Request) | Current_Matches], Best_Matches).
     
+%% stable_renter_house_matching/2
+%% stable_renter_house_matching(Request_HouseList, Best_Matches_List).
+%% Δέχεται σαν είσοδο μία λίστα από συναρτησιακούς όρους request_house(Request, [house_maxrent(house, max_rent), ...]) όπου Request ο πιθανός ενοικιαστής και [house_maxrent(house, max_rent), ...]
+%%  λίστα με ζεύγη σπιτιών που ικανοποιούν τις απαιτήσεις του (house) και max_rent το μέγιστο ενοίκιο που διατίθεται να δώσει για αυτό το σπίτι, η οποία είναι φθίνουσα ταξινομημένη ως προς τα κοινά προς όλους κριτήρια καλύτερου διαμερίσματος.
+%% Επιστρέφει μία λίστα (Best_Matches_List) με ζεύγη request_house_match(house_maxrent(house, max_rent), renter) όπου το house είναι το σπίτι (με διατιθέμενο ενοίκιο max_rent) που ο ενοικιαστής renter καταλήγει να νοικιάζει στο τέλος του πλειστηριασμού.
+%% Το κύριο έργο πραγματοποιείται από το βοηθητικό κατηγόρημα stable_renter_house_matching_aux/4, όπου το τρέχον απλά αρχικοποιεί μεταβλητές του βοηθητικού.
 
-    
+% Τερματική συνθήκη: περίπτωση κενής λίστας με πελάτες προς αναζήτηση (δόθηκε κενή λίστα πελατών), απλά αποτυγχάνει γιατί αφενός δεν είναι έγκυρη ενέργεια και αφετέρου για να "προστατέψει" το κατηγόρημα.
+stable_renter_house_matching_aux([], _Number_Of_Requests, Current_Matches_List, Current_Matches_List) :- fail.
+
+% Αρχικοποίηση μεταβλητών και εκκίνηση διαδικασίας.
+stable_renter_house_matching(Request_HouseList, Best_Matches_List) :-
+    % Υπολογισμός μήκους.
+    length(Request_HouseList, Number_Of_Requests),
+    stable_renter_house_matching_aux(Request_HouseList, Number_Of_Requests, [], Best_Matches_List).
 
 /* --------------------------------------- *|
 |* --           Λειτουργία 1            -- *|
@@ -743,7 +740,7 @@ mode_1(Min_Area, Min_Sleeping_Quarters, Requires_Pets, Elevator_Limit, Max_Rent,
 
 %% mode_2/3
 %% mode_2(Renter_Name, Compatible_Houses, Best_House_Addr).
-%% Δέχεται σαν είσοδο το όνομα ενός υποψήφιου ενοικιαστή και επιστρέφει μία λίστα με και επιστρέφει λίστα (Compatible_Houses) με ένα ή περισσότερα διαμερίσματα που ικανοποιούν τις απαιτήσεις του υποψήφιου ενοικιαστή
+%% Δέχεται σαν είσοδο το όνομα ενός υποψήφιου ενοικιαστή και επιστρέφει λίστα (Compatible_Houses) με ένα ή περισσότερα διαμερίσματα που ικανοποιούν τις απαιτήσεις του υποψήφιου ενοικιαστή
 %% (με ολόκληρους τους συναρτησιακούς όρους house/9).
 mode_2(Renter_Name, Compatible_Houses, Best_House_Addr) :-
     % Εντοπίζω τις απαιτήσεις του κατονομαζόμενου πιθανού ενοικιαστή.
@@ -753,4 +750,73 @@ mode_2(Renter_Name, Compatible_Houses, Best_House_Addr) :-
     mode_1(Min_Area, Min_Sleeping_Quarters, Requires_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden, Compatible_Houses, Best_House_Addr).
 
 
+/* -------------------------------------- *|
+|* --           Λειτουργία 3           -- *|
+|* -- Επιλογή πελατών μέσω δημοπρασίας -- *|
+|* -------------------------------------- */ 
 
+
+%% simplify_match_results/2
+%% simplify_match_results(Complex_List, Simple_List).
+%% Ώς λειτουργία του έχει να απλοποιεί τα "αποτελέσματα" του κατηγορήματος stable_renter_house_matching και να τα μετατρέπει σε (απλούστερη) λίστα ζευγών renter_name_house_addr(name, addr), 
+%%όπου name το όνομα του υποψήφιου ενοικιαστή και addr η διεύθυνση του διαμερίσματος το %% όποιο πλειοδότησε εκείνος. Σε περίπτωση που δεν βρέθηκε διαμέρισμα για κάποιον πελάτη, εκείνος ως 
+%% addr θα έχει αντιστοιχηθεί με το άτομο 'no_house'.
+
+% Περίπτωση κενής λίστας: Απλά επιστρέφω την κενή λίστα σαν αποτέλεσμα (η απλοποίηση των κατηγορημάτων κενής λίστας είναι η κενή λίστα).
+simplify_match_results([], []).
+
+% Γενική περίπτωση.
+simplify_match_results([request_house_match(House_Max_Rent, Name) | C_Rest], [renter_name_house_addr(Name, Addr) | S_Rest]) :-
+    % Εξαγωγή των ζητούμενων πληροφοριών.
+    House_Max_Rent = house_maxrent(house(Addr, _Sleeping_Quarters, _Floor_Area, _At_Center, _Floor, _Has_Elevator, _Allows_Pets, _Garden_Area, _Rent), _Max_Willing_Rent),
+
+    % Αναδρομική κατασκευή αποτελέσματος.
+    simplify_match_results(C_Rest, S_Rest).
+
+% Περίπτωση όπου στο κατηγόρημα κορυφής ο ενοικιαστής δεν αντιστοιχείται σε κανένα σπίτι.
+simplify_match_results([request_house_match(House_Max_Rent, Name) | C_Rest], [renter_name_house_addr(Name, no_house) | S_Rest]) :-
+    % Εξαγωγή των ζητούμενων πληροφοριών.
+    House_Max_Rent = house_maxrent(no_house, _Max_Willing_Rent),
+
+    % Αναδρομική κατασκευή αποτελέσματος.
+    simplify_match_results(C_Rest, S_Rest).
+
+
+%% find_sorted_compatible_house_list/2
+%% find_sorted_compatible_house_list(Name_List, Request_House).
+%% Δέχεται μία λίστα με ονόματα υποψήφιων ενοικιαστών (Name_List) και για τον πρώτο πελάτη της λίστας επιστρέφει φθίνουσα ταξινομημένη λίστα ζευγών ικανοποιητικών σπιτιών και μέγιστου ενοικίου για αυτά όπου στην κορυφή βρίσκεται 
+%% το καλύτερο σπίτι και στο τελευταίο στοιχείο το λιγότερο καλύτερο, σύμφωνα με τις κοινές-για-όλους προτιμήσεις.
+%% Εναλλακτικές λύσεις δίνουν την αντίστοιχη λίστα ζευγών για τον 2ο, 3ο, κ.ο.κ. ενοικιαστή.
+
+% Κύρια περίπτωση: Εύρεση λίστας για τον πρώτο πελάτη της λίστας.
+find_sorted_compatible_house_list([Name | _Rest_Names], request_house(Name, Sorted_House_Max_Rent_List)) :-
+    % Εντοπίζεται το αίτημα του ενοικιαστή.
+    request(Name, Min_Area, Min_Sleeping_Quarters, Req_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden),
+
+    % Βρίσκονται τα συμβατά, με τις απαιτήσεις του ενοικιαστή, σπίτια.
+    compatible_houses_w_maxrent(Min_Area, Min_Sleeping_Quarters, Req_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden, _House_List, House_Maxrent_List),
+
+    % Τα συμβατά σπίτια ταξινομούνται από το πιο επιθυμητό προς το λιγότερο.
+    sort_houses_best_top(House_Maxrent_List, Sorted_House_Max_Rent_List).
+    
+% Εναλλακτική περίπτωση: Εύρεση λίστας για τον επόμενο πελάτη της λίστας.
+find_sorted_compatible_house_list([_Name | Rest_Names], Request_House) :-
+    find_sorted_compatible_house_list(Rest_Names, Request_House).
+
+
+%% mode_3/2
+%% mode_3(Name_List, Resulting_Matches)
+%% Δέχεται σαν είσοδο λίστα με ονόματα των υποψήφιων ενοικιαστών και επιστρέφει μία λίστα με ζεύγη renter_name_house_addr(name, addr), όπου name το όνομα του υποψήφιου ενοικιαστή και addr η διεύθυνση του διαμερίσματος το
+%% όποιο πλειοδότησε εκείνος. Σε περίπτωση που δεν βρέθηκε διαμέρισμα για κάποιον πελάτη, εκείνος ως addr θα έχει αντιστοιχηθεί με το άτομο '$None$'.
+
+mode_3(Name_List, Resulting_Matches) :- 
+    % Για όλους τους ενοικιαστές, βρίσκω τα συμβατά (με τις απαιτήσεις του) σπίτια και "παίρνω" την ταξινομημένη λίστα αυτών.
+    % Τα αποτελέσματα αυτά, εισάγονται στην συνέχεια σε μία νέα λίστα.
+    findall(Request_House, find_sorted_compatible_house_list(Name_List, Request_House), Request_House_List),
+
+    % Εκτέλεση "πλειστηριασμού": Για κάθε πιθανό ενοικιαστή, βρίσκω το σπίτι το οποίο τον ικανοποιεί όσο το δυνατόν περισσότερο και παράλληλα είναι
+    % εκείνος ο οποίος διαθέτει τα περισσότερα (σε σχέση με τους άλλους) ενοίκιο για αυτό.
+    stable_renter_house_matching(Request_House_List, Best_Matches_List),
+
+    % Επειδή τα αποτελέσματα του stable_renter_house_matching, είναι σε δυσνόητη μορφή, μετατρέπονται σε απλούστερα ζεύγη renter_name_house_addr(name, addr).
+    simplify_match_results(Best_Matches_List, Resulting_Matches).
