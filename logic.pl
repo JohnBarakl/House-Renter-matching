@@ -1,45 +1,61 @@
 % This file is encoded in UTF-8.
 
+/* ---------------------------------------- *|
+|* -- Ονοματεπώνυμο: Μπαρακλιλής Ιωάννης -- *|
+|* --             ΑΕΜ: 3685              -- *|
+|* ---------------------------------------- */ 
+
+% Σημείωση: Το τρέχον αρχείο υλοποιεί αποκλειστικά το μέρος της λογικής - εκτέλεση υπολογισμών και είναι απαραίτητο για την λειτουργία του main.pl.
 % Φόρτωση εξωτερικών πληροφοριών δεν γίνεται, θεωρείται ότι έγιναν από main.pl.
 
 /* ---------------------------------------------------------------------------------- *|
 |* -- Εύρεση διαμερίσματος που ικανοποιούν τις απαιτήσεις του υποψήφιου ενοικιαστή -- *|
 |* ---------------------------------------------------------------------------------- */ 
 
-%% satisfies_rent_requirements/11
-%% satisfies_rent_requirements(At_Center, Max_Rent_Center,Floor_Area, Min_Area, Max_Rent_Suburbs, Bonus_Area, Garden_Area, Bonus_Garden, Max_Rent, Rent, Max_Rent).
-%% Επιτυγχάνει αν ικανοποιεί απαιτήσεις σχετικά με το ενοίκιο δεδομένου ότι είναι στα προάστια ή όχι.
-%% Επιπλέον, επιστρέφει το μέγιστο ποσό που είναι διατίθεται ο ενοικιαστής να δώσει για αυτό το σπίτι.
+%% satisfies_augmented_rent_requirements/11
+%% satisfies_augmented_rent_requirements(At_Center, Max_Rent_Center, Floor_Area, Min_Area, Max_Rent_Suburbs, Bonus_Area, Garden_Area, Bonus_Garden, Max_Rent, Rent, New_Limited_Max_Rent).
+%% Επιτυγχάνει αν ικανοποιεί τις προχωρημένες απαιτήσεις σχετικά με το ενοίκιο (δηλαδή με τις προσαυξήσεις) δεδομένου αν είναι στα προάστια ή όχι.
+%% Επιπλέον, επιστρέφει το μέγιστο ποσό που είναι διατίθεται ο ενοικιαστής να δώσει για αυτό το σπίτι (New_Limited_Max_Rent).
+%%
+%% Σημείωση: Θεωρείται δεδομένο πως τα χαρακτηριστικά του διαμερίσματος ικανοποιούν τον περιορισμό ελάχιστων απαιτούμενων τετραγωνικών (Floor_Area >= Min_Area). Αν όχι, τότε είναι πολύ
+%% πιθανό να έχουμε λανθασμένο αποτέλεσμα. Ο λόγος για τον οποίο θεωρείται δεδομένο είναι για λόγους απλότητας του κώδικα και ότι σε αυτό το πλαίσιο χρήσης δεν υπάρχει περίπτωση λάθος κλήσης
+%% (εφόσον καλείται από compatible_house αφότου έχει εξασφαλίσει ότι Floor_Area >= Min_Area).
  
 % Αν βρίσκεται στο κέντρο.
-satisfies_rent_requirements(yes, Max_Rent_Center, Floor_Area, Min_Area, _, Bonus_Area, Garden_Area, Bonus_Garden, Max_Rent, Rent, New_Limited_Max_Rent) :- 
+satisfies_augmented_rent_requirements(yes, Max_Rent_Center, Floor_Area, Min_Area, _, Bonus_Area, Garden_Area, Bonus_Garden, Max_Rent, Rent, New_Limited_Max_Rent) :- 
     % Υπολογισμός του μέγιστου ποσού που διατίθεται να πληρώσει με συνυπολογισμό των επιπλέον τετραγωνικών και κήπου.
     New_Max_Rent_Center is Max_Rent_Center + Bonus_Area * (Floor_Area - Min_Area) + Bonus_Garden * Garden_Area,
+    % Σημείωση: είναι δεδομένο πως Floor_Area >= Min_Area (από compatible_house που "καλεί" αυτό το κατηγόρημα) και έτσι Floor_Area - Min_Area >= 0.
 
-    % Το Max_Rent μας δίνει το άνω όριο διαθέσιμου ποσού, δηλαδή το "νέο" μέγιστου ποσού πρέπει να περιοριστεί βάσει του άνω ορίου.
+    % Το Max_Rent μας δίνει το άνω όριο διαθέσιμου ποσού συνολικά, δηλαδή το "νέο" μέγιστο ποσό (που υπολογίστηκε παραπάνω) πρέπει να "περιοριστεί" βάσει του (να μην ξεπερνάει ποτέ το) άνω ορίου.
+    % Δηλαδή είτε New_Max_Rent =< Max_Rent οπότε θα πάρουμε το νέο μέγιστο νοίκι (με τις προσαυξήσεις λόγω επιπλέον τετραγωνικών ή/και κήπου) ή New_Max_Rent > Max_Rent οπότε εφόσον το συνολικό ποσό
+    % (προσαυξημένο) δεν μπορεί να ξεπερνάει το άνω όριο διαθέσιμου ποσού θα πάρουμε το άνω όριο διαθέσιμου ποσού.
     New_Limited_Max_Rent is min(New_Max_Rent_Center, Max_Rent),
 
-    % Το ενοίκιο του διαμερίσματος πρέπει να είναι μικρότερο ή ίσο από το μέγιστο του διαθέσιμου ποσού που διατίθεται να δώσει ενώ παράλληλα το νέο μέγιστο να είναι.
+    % Το ενοίκιο του διαμερίσματος πρέπει να είναι μικρότερο ή ίσο του μέγιστου ποσού για διάθεση.
     New_Limited_Max_Rent >= Rent.
 
 % Αν βρίσκεται στα προάστια.
-satisfies_rent_requirements(no, _, Floor_Area, Min_Area, Max_Rent_Suburbs, Bonus_Area, Garden_Area, Bonus_Garden, Max_Rent, Rent, New_Limited_Max_Rent) :- 
+satisfies_augmented_rent_requirements(no, _, Floor_Area, Min_Area, Max_Rent_Suburbs, Bonus_Area, Garden_Area, Bonus_Garden, Max_Rent, Rent, New_Limited_Max_Rent) :- 
     % Υπολογισμός του μέγιστου ποσού που διατίθεται να πληρώσει με συνυπολογισμό των επιπλέον τετραγωνικών και κήπου.
     New_Max_Rent_Suburbs is Max_Rent_Suburbs + Bonus_Area * (Floor_Area - Min_Area) + Bonus_Garden * Garden_Area,
+    % Σημείωση: είναι δεδομένο πως Floor_Area >= Min_Area (από compatible_house που "καλεί" αυτό το κατηγόρημα) και έτσι Floor_Area - Min_Area >= 0.
 
-    % Το Max_Rent μας δίνει το άνω όριο διαθέσιμου ποσού, δηλαδή το "νέο" μέγιστου ποσού πρέπει να περιοριστεί βάσει του άνω ορίου.
+    % Το Max_Rent μας δίνει το άνω όριο διαθέσιμου ποσού συνολικά, δηλαδή το "νέο" μέγιστο ποσό (που υπολογίστηκε παραπάνω) πρέπει να "περιοριστεί" βάσει του (να μην ξεπερνάει ποτέ το) άνω ορίου.
+    % Δηλαδή είτε New_Max_Rent =< Max_Rent οπότε θα πάρουμε το νέο μέγιστο νοίκι (με τις προσαυξήσεις λόγω επιπλέον τετραγωνικών ή/και κήπου) ή New_Max_Rent > Max_Rent οπότε εφόσον το συνολικό ποσό
+    % (προσαυξημένο) δεν μπορεί να ξεπερνάει το άνω όριο διαθέσιμου ποσού θα πάρουμε το άνω όριο διαθέσιμου ποσού.
     New_Limited_Max_Rent is min(New_Max_Rent_Suburbs, Max_Rent),
 
-    % Το ενοίκιο του διαμερίσματος πρέπει να είναι μικρότερο ή ίσο από το μέγιστο του διαθέσιμου ποσού που διατίθεται να δώσει ενώ παράλληλα το νέο μέγιστο να είναι.
+    % Το ενοίκιο του διαμερίσματος πρέπει να είναι μικρότερο ή ίσο του μέγιστου ποσού για διάθεση.
     New_Limited_Max_Rent >= Rent.
 
-%% compatible_house/9
+%% compatible_house/11
 %% compatible_house(Min_Area, Min_Sleeping_Quarters, Requires_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden, House, Max_Rent_Willing).
-%% Επιτυγχάνει για διαμέρισμα με διεύθυνση House_Address, το οποίο ικανοποιεί τους δοθέντες περιορισμούς.
-%% Το "Max_Rent" περιέχει το μέγιστο ποσό (ενοίκιο) που είναι διατίθεται ο ενοικιαστής να δώσει για αυτό το σπίτι.
+%% Επιτυγχάνει για διαμέρισμα (όρισμα House) το οποίο ικανοποιεί τους δοθέντες περιορισμούς (προβλεπόμενη χρήση είναι να δίνονται σαν "έξοδοι" τα House (τύπου house(...)) και Max_Rent_Willing και τα άλλα ορίσματα σαν είσοδοι).
+%% Το "Max_Rent_Willing" περιέχει το μέγιστο ποσό (ενοίκιο) που διατίθεται ο ενοικιαστής να δώσει για αυτό το σπίτι.
 
 compatible_house(Min_Area, Min_Sleeping_Quarters, Requires_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden, House, Max_Rent_Willing) :-
-    % "Δίνω" τιμές στις μεταβλητές που αργότερα θα ελέγξω.
+    % "Δίνω" τιμές στις μεταβλητές που αργότερα θα ελέγξω (ουσιαστικά, "βρίσκω" κάποιο σπίτι).
     house(House_Address, Sleeping_Quarters, Floor_Area, At_Center, Floor, Has_Elevator, Allows_Pets, Garden_Area, Rent),
 
     % Απαιτήσεις σχετικά με το διαμέρισμα.
@@ -49,22 +65,21 @@ compatible_house(Min_Area, Min_Sleeping_Quarters, Requires_Pets, Elevator_Limit,
     Allows_Pets == Requires_Pets,
 
     % Απαιτήσεις σχετικά με το ενοίκιο.
-    satisfies_rent_requirements(At_Center, Max_Rent_Center,Floor_Area, Min_Area, Max_Rent_Suburbs, Bonus_Area, Garden_Area, Bonus_Garden, Max_Rent, Rent, Max_Rent_Willing),
+    satisfies_augmented_rent_requirements(At_Center, Max_Rent_Center,Floor_Area, Min_Area, Max_Rent_Suburbs, Bonus_Area, Garden_Area, Bonus_Garden, Max_Rent, Rent, Max_Rent_Willing),
     House = house(House_Address, Sleeping_Quarters, Floor_Area, At_Center, Floor, Has_Elevator, Allows_Pets, Garden_Area, Rent).
 
-%% compatible_houses/8
+%% compatible_houses/10
 %% compatible_houses(Min_Area, Min_Sleeping_Quarters, Requires_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden, House_List).
-%% Βρίσκει και επιστρέφει μία λίστα με τα σπίτια που ικανοποιούν τις απαιτήσεις του ενοικιαστή.
+%% Βρίσκει και επιστρέφει μία λίστα με τα σπίτια (House_List) που ικανοποιούν τις απαιτήσεις του ενοικιαστή.
 compatible_houses(Min_Area, Min_Sleeping_Quarters, Requires_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden, House_List) :-
     findall(House, compatible_house(Min_Area, Min_Sleeping_Quarters, Requires_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden, House, _Max_Rent_Willing), House_List).
 
 
-%% compatible_houses_w_maxrent/9
-%% compatible_houses(Min_Area, Min_Sleeping_Quarters, Requires_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden, House_List, Maxrent_List).
-%% Βρίσκει και επιστρέφει μία λίστα με σπίτια που ικανοποιούν τις απαιτήσεις του ενοικιαστή (House_List). 
-%% Παράλληλα, επιστρέφει και λίστα (House_Maxrent_List) με ζεύγη σπιτιών και μεγίστου διατιθέμενου ενοικίου για αυτά, τα οποία ικανοποιούν τις απαιτήσεις του ενοικιαστή. Τα ζεύγη που περιέχει η λίστα έχουν την μορφή
+%% compatible_houses_w_maxrent/8
+%% compatible_houses(Min_Area, Min_Sleeping_Quarters, Requires_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden, Maxrent_List).
+%% Βρίσκει και επιστρέφει λίστα (House_Maxrent_List) με ζεύγη σπιτιών και μεγίστου διατιθέμενου ενοικίου για αυτά, τα οποία ικανοποιούν τις απαιτήσεις του ενοικιαστή. Τα ζεύγη που περιέχει η λίστα έχουν την μορφή
 %% house_maxrent(House, Max_Rent).
-compatible_houses_w_maxrent(Min_Area, Min_Sleeping_Quarters, Requires_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden, _House_List, House_Maxrent_List) :-
+compatible_houses_w_maxrent(Min_Area, Min_Sleeping_Quarters, Requires_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden, House_Maxrent_List) :-
     % Βρίσκω όλα τα σπίτια και τα μέγιστα διατιθέμενα ενοίκια.
     findall(house_maxrent(House, Max_Rent_Willing), compatible_house(Min_Area, Min_Sleeping_Quarters, Requires_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden, House, Max_Rent_Willing), House_Maxrent_List).
 
@@ -794,7 +809,7 @@ find_sorted_compatible_house_list([Name | _Rest_Names], request_house(Name, Sort
     request(Name, Min_Area, Min_Sleeping_Quarters, Req_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden),
 
     % Βρίσκονται τα συμβατά, με τις απαιτήσεις του ενοικιαστή, σπίτια.
-    compatible_houses_w_maxrent(Min_Area, Min_Sleeping_Quarters, Req_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden, _House_List, House_Maxrent_List),
+    compatible_houses_w_maxrent(Min_Area, Min_Sleeping_Quarters, Req_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden, House_Maxrent_List),
 
     % Τα συμβατά σπίτια ταξινομούνται από το πιο επιθυμητό προς το λιγότερο.
     sort_houses_best_top(House_Maxrent_List, Sorted_House_Max_Rent_List).
