@@ -49,6 +49,32 @@ satisfies_augmented_rent_requirements(no, _, Floor_Area, Min_Area, Max_Rent_Subu
     % Το ενοίκιο του διαμερίσματος πρέπει να είναι μικρότερο ή ίσο του μέγιστου ποσού για διάθεση.
     New_Limited_Max_Rent >= Rent.
 
+%% satisfied_floor_req\3
+%% satisfied_floor_req(Floor, Elevator_Limit, Has_Elevator).
+%% Επιτυγχάνει αν Floor < Elevator_Limit ή Has_Elevator == yes ή και τα δύο, δηλαδή να ικανοποιούνται οι απαιτήσεις για ελάχιστο όροφο για
+%% ανελκυστήρα, χωρίς να δημιουργεί πολλές (άχρηστες) εναλλακτικές λύσεις.
+
+% Βρίσκεται σε μικρότερο όροφο απο ότι απαιτείται για ανελκυστήρα.
+satisfied_floor_req(Floor, Elevator_Limit, _) :-
+    Floor < Elevator_Limit, !.  % Το ! γιατί οι δύο κανόνες είναι αμοιβαία αποκλειόμενοι .
+
+% Βρίσκεται σε μεγαλύτερο (ή ίσο) όροφο απο ότι απαιτείται για ανελκυστήρα και έχει ανελκυστήρα.
+satisfied_floor_req(Floor, Elevator_Limit, Has_Elevator) :-
+    Floor >= Elevator_Limit, Has_Elevator == yes.
+
+
+%% satisfied_pet_req\2
+%% satisfied_pet_req(Requires_Pets, Allows_Pets).
+%% Επιτυγχάνει αν ικανοποιούνται οι απαιτήσεις σχετικά με το αν επιτρέπονται κατοικίδια.
+
+% Ο ενοικιαστής δεν ενδιαφέρεται για το να επιτρέπονται κατοικίδια: Είναι αδιάφορο το αν επιτρέπονται.
+satisfied_pet_req(Requires_Pets, _Allows_Pets) :-
+    Requires_Pets == no, !.  % Το ! γιατί οι δύο κανόνες είναι αμοιβαία αποκλειόμενοι.
+
+% Ο ενοικιαστής ενδιαφέρεται για το να επιτρέπονται κατοικίδια και επιτρέπονται.
+satisfied_pet_req(Requires_Pets, Allows_Pets) :-
+    Requires_Pets == yes, Allows_Pets = yes.
+
 %% compatible_house/11
 %% compatible_house(Min_Area, Min_Sleeping_Quarters, Requires_Pets, Elevator_Limit, Max_Rent, Max_Rent_Center, Max_Rent_Suburbs, Bonus_Area, Bonus_Garden, House, Max_Rent_Willing).
 %% Επιτυγχάνει για διαμέρισμα (όρισμα House) το οποίο ικανοποιεί τους δοθέντες περιορισμούς (προβλεπόμενη χρήση είναι να δίνονται σαν "έξοδοι" τα House (τύπου house(...)) και Max_Rent_Willing και τα άλλα ορίσματα σαν είσοδοι).
@@ -61,8 +87,8 @@ compatible_house(Min_Area, Min_Sleeping_Quarters, Requires_Pets, Elevator_Limit,
     % Απαιτήσεις σχετικά με το διαμέρισμα.
     Sleeping_Quarters >= Min_Sleeping_Quarters,
     Floor_Area >= Min_Area,
-    (Floor < Elevator_Limit ; Has_Elevator == yes),
-    Allows_Pets == Requires_Pets,
+    satisfied_floor_req(Floor, Elevator_Limit, Has_Elevator),
+    satisfied_pet_req(Requires_Pets, Allows_Pets),
 
     % Απαιτήσεις σχετικά με το ενοίκιο.
     satisfies_augmented_rent_requirements(At_Center, Max_Rent_Center,Floor_Area, Min_Area, Max_Rent_Suburbs, Bonus_Area, Garden_Area, Bonus_Garden, Max_Rent, Rent, Max_Rent_Willing),
